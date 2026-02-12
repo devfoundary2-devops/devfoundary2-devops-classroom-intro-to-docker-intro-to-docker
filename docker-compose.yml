@@ -1,17 +1,40 @@
+version: "3.9"
+
 services:
-  app:
+  web:
     build: .
+    container_name: fastapi_app
     ports:
       - "8080:8080"
     depends_on:
+      - redis
       - db
-  db:
-    image: postgres:17-alpine
     environment:
-      POSTGRES_USER: demo
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: demo
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      POSTGRES_DB: appdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppass
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+
+  redis:
+    image: redis:6.0-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  db:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppass
+    ports:
+      - "5432:5432"
     volumes:
-      - /Users/david/tech4dev/v2/bootcamp/docker/data:/var/lib/postgresql/data
-# volumes:
-#   db_data:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
